@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulado EEAR — Curso de Formação de Cabos (CFC)</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --secondary: #0f172a;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --border: #e2e8f0;
+            --correct: #16a34a;
+            --correct-bg: #f0fdf4;
+            --incorrect: #dc2626;
+            --incorrect-bg: #fef2f2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .module-title {
+            background-color: var(--secondary);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8rem;
+            border-radius: 8px;
+            margin: 2rem 0 1rem 0;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .question-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .question-number {
+            font-weight: bold;
+            color: var(--primary-light);
+            font-size: 1.1rem;
+        }
+
+        .badge-cabo {
+            background-color: #f59e0b;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .question-text {
+            font-size: 1rem;
+            margin-bottom: 1.2rem;
+            font-weight: 500;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: #fff;
+        }
+
+        .option-label:hover {
+            background-color: #f1f5f9;
+            border-color: var(--primary-light);
+        }
+
+        .option-label input {
+            margin-right: 0.75rem;
+            accent-color: var(--primary);
+        }
+
+        .explanation {
+            display: none;
+            margin-top: 1.2rem;
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .btn-check {
+            margin-top: 1rem;
+            background-color: var(--primary-light);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-check:hover {
+            background-color: var(--primary);
+        }
+
+        /* Score floating bar */
+        .score-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--secondary);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        .correct-opt {
+            background-color: var(--correct-bg) !important;
+            border-color: var(--correct) !important;
+            color: var(--correct) !important;
+            font-weight: 600;
+        }
+
+        .incorrect-opt {
+            background-color: var(--incorrect-bg) !important;
+            border-color: var(--incorrect) !important;
+            color: var(--incorrect) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>SIMULADO EEAR — CURSO DE FORMAÇÃO DE CABOS (CFC)</h1>
+        <p>40 Questões Inéditas e Contextualizadas | Foco em Atribuições e Legislação do Cabo</p>
+    </header>
+
+    <div class="container" id="quiz-container">
+        <!-- Content inserted dynamically -->
+    </div>
+
+    <div class="score-bar">
+        <div>Respondidas: <span id="answered-count">0</span> / 40</div>
+        <div>Acertos: <span id="correct-count" style="color: #4ade80;">0</span></div>
+        <div>Erros: <span id="incorrect-count" style="color: #f87171;">0</span></div>
+    </div>
+
+    <script>
+        const questionsData = [
+            // MÓDULO I
+            {
+                module: "MÓDULO I — CAMPO TÉCNICO AAP & INFORMÁTICA / REDAÇÃO OFICIAL",
+                num: 1,
+                isCabo: false,
+                text: "Durante a manutenção do banco de dados do SILOMS em uma Organização Militar, ocorreu um desligamento repentino e não programado da fonte de energia elétrica dos computadores. Considerando a arquitetura de hardware, qual memória teve seu conteúdo totalmente apagado de forma imediata devido à sua natureza volátil?",
+                options: ["Memória ROM", "Memória RAM", "Disco Rígido (HDD)", "Memória Flash SSD"],
+                answer: 1,
+                explanation: "<strong>Resposta: B (Memória RAM)</strong><br>A RAM é a memória de acesso aleatório volátil, que perde todos os seus dados e conteúdos temporários quando a alimentação elétrica é interrompida."
+            },
+            {
+                module: "MÓDULO I — CAMPO TÉCNICO AAP & INFORMÁTICA / REDAÇÃO OFICIAL",
+                num: 2,
+                isCabo: false,
+                text: "Um Cabo da especialidade AAP necessita confeccionar e arquivar formulários contínuos com vias carbonadas simultâneas para emissão de guias de trânsito de material e controle de almoxarifado. Qual tipo de impressora deve ser utilizado por possuir essa capacidade exclusiva?",
+                options: ["Impressora a Jato de Tinta", "Impressora a Laser", "Impressora 3D (FDM)", "Impressora de Impacto (Matricial)"],
+                answer: 3,
+                explanation: "<strong>Resposta: D (Impressora de Impacto / Matricial)</strong><br>A impressora de impacto (matricial) é a única tecnologia capaz de imprimir em formulários contínuos com múltiplas vias carbonadas através de pressão/impacto mecânico sobre as agulhas."
+            },
+            {
+                module: "MÓDULO I — CAMPO TÉCNICO AAP & INFORMÁTICA / REDAÇÃO OFICIAL",
+                num: 3,
+                isCabo: false,
+                text: "No processamento digital de dados da FAB, a capacidade de armazenamento é medida em progressão binária. Assinale a alternativa que apresenta a equivalência correta de capacidade:",
+                options: ["1 Megabyte (MB) = 1.024 Bytes", "1 Gigabyte (GB) = 1.024 Megabytes (MB)", "1 Terabyte (TB) = 1.024 Megabytes (MB)", "1 Kilobyte (KB) = 8 bits"],
+                answer: 1,
+                explanation: "<strong>Resposta: B (1 GB = 1.024 MB)</strong><br>Em sistemas de armazenamento computacional baseados em lógica binária ($2^{10}$), 1 Gigabyte equivale exatamente a 1.024 Megabytes."
+            },
+            {
+                module: "MÓDULO I — CAMPO TÉCNICO AAP & INFORMÁTICA / REDAÇÃO OFICIAL",
+                num: 4,
+                isCabo: false,
+                text: "Conforme a Lei nº 12.527/2011 (LAI), as informações públicas são a regra e a restrição de acesso é exceção. Os prazos máximos de restrição de acesso para as informações classificadas nos graus Ultrassecreta, Secreta e Reservada são, respectivamente:",
+                options: ["25 anos, 15 anos e 5 anos.", "30 anos, 20 anos e 10 anos.", "20 anos, 10 anos e 5 anos.", "25 anos, 10 anos e 2 anos."],
+                answer: 0,
+                explanation: "<strong>Resposta: A (25 anos, 15 anos e 5 anos)</strong><br>Conforme a Lei de Acesso à Informação (LAI), os prazos máximos de classificação de sigilo são: Ultrassecreta (25 anos), Secreta (15 anos) e Reservada (5 anos)."
+            },
+            {
+                module: "MÓDULO I — CAMPO TÉCNICO AAP & INFORMÁTICA / REDAÇÃO OFICIAL",
+                num: 5,
+                isCabo: false,
+                text: "Em conformidade com o Decreto nº 9.758/2019 e a NSCA 5-3, assinale a opção que apresenta o pronome de tratamento correto a ser empregado na comunicação escrita e oral dirigida a agentes públicos da Administração Pública Federal, independentemente do posto ou graduação:",
+                options: ["Vossa Excelência", "Vossa Senhoria", "Senhor ou Senhora", "Ilustríssimo"],
+                answer: 2,
+                explanation: "<strong>Resposta: C (Senhor ou Senhora)</strong><br>O Decreto nº 9.758/2019 padronizou o uso do tratamento na administração pública federal, determinando 'Senhor' ou 'Senhora' como único tratamento aceito, abolindo formas como Vossa Senhoria ou Ilustríssimo."
+            },
+            {
+                module: "MÓDULO I — CAMPO TÉCNICO AAP & INFORMÁTICA / REDAÇÃO OFICIAL",
+                num: 6,
+                isCabo: false,
+                text: "No âmbito do COMAER, a redação de documentos oficiais deve observar regras rígidas de padronização (MD33-M-02 e NSCA 5-3). Assinale a alternativa cuja grafia do texto está INCORRETA:",
+                options: [
+                    "O militar apresentou-se no dia 25 AGO 2023 às 14 h 30 min.",
+                    "Foram adquiridos materiais no valor de R$ 2.000,00 (dois mil Reais).",
+                    "O curso terá início em 1º de maio de 2026.",
+                    "Conforme consta na ICA cinco traço um, a norma deve ser cumprida."
+                ],
+                answer: 3,
+                explanation: "<strong>Resposta: D</strong><br>Em citações formais e referências de documentos oficiais, normas e regulamentos, utiliza-se a forma alfanumérica padronizada ('ICA 5-1'), sendo vedado escrever o numeral por extenso ('ICA cinco traço um')."
+            },
+            {
+                module: "MÓDULO I — CAMPO TÉCNICO AAP & INFORMÁTICA / REDAÇÃO OFICIAL",
+                num: 7,
+                isCabo: false,
+                text: "Documento administrativo utilizado por autoridade competente no âmbito da FAB para dar andamento a um processo, solicitando informações, determinando providências ou emitindo pareceres em continuidade ao documento que o originou:",
+                options: ["Ofício Circular", "Despacho", "Ofício Particular", "Portaria"],
+                answer: 1,
+                explanation: "<strong>Resposta: B (Despacho)</strong><br>O Despacho é o documento de expediente intermediário ou final destinado a dar andamento a um processo, manifestando pareceres, solicitações ou ordens em continuidade a uma tramitação."
+            },
+            {
+                module: "MÓDULO I — CAMPO TÉCNICO AAP & INFORMÁTICA / REDAÇÃO OFICIAL",
+                num: 8,
+                isCabo: false,
+                text: "Quando um militar precisa confeccionar um expediente para tratar de assunto estritamente de seu interesse particular (ex: comunicação de prestação de concurso público), a norma prescreve que o documento correto e sua identificação na epígrafe serão:",
+                options: [
+                    "Ofício Interno, numerado sequencialmente pela seção.",
+                    "Ofício Particular, identificado pela abreviatura 's/nº' (sem numeração sequencial do setor).",
+                    "Despacho Decisório, identificado pelo número de protocolo do COMAER.",
+                    "Ofício Circular, identificado pelo nome do Comandante da OM."
+                ],
+                answer: 1,
+                explanation: "<strong>Resposta: B</strong><br>O Ofício Particular trata de assuntos pessoais do militar dirigidos à administração e não recebe numeração sequencial de saída do setor/seção, sendo identificado por 's/nº'."
+            },
+
+            // MÓDULO II
+            {
+                module: "MÓDULO II — LOGÍSTICA, MANUTENÇÃO, FERRAMENTAS E ELETRICIDADE",
+                num: 9,
+                isCabo: false,
+                text: "Na terminologia técnica de manutenção adotada no SILOMS, a retirada autorizada e excepcional de uma peça de um equipamento ou aeronave para instalação em outro vetor, a fim de deixá-lo em pronto apronto, denomina-se:",
+                options: ["Overhaul", "Canibalização", "Implantação", "Manutenção Preditiva"],
+                answer: 1,
+                explanation: "<strong>Resposta: B (Canibalização)</strong><br>Canibalização é o termo técnico para a remoção autorizada de componente/peça operacional de um equipamento ou aeronave para pronto restabelecimento da operacionalidade de outro."
+            },
+            {
+                module: "MÓDULO II — LOGÍSTICA, MANUTENÇÃO, FERRAMENTAS E ELETRICIDADE",
+                num: 10,
+                isCabo: false,
+                text: "Um Cabo mecânico da FAB está selecionando ferramentas para efetuar o torque correto em parafusos e porcas de uma aeronave. Sobre o uso e manutenção de ferramentas manuais, assinale a afirmativa correta:",
+                options: [
+                    "O torquímetro pode ser utilizado para alavancar e afrouxar porcas emperradas.",
+                    "O militar deve sempre empurrar a chave combinada para garantir maior força e braço de alavanca.",
+                    "É permitido o uso de alicates convencionais em porcas estriadas ou conexões hidráulicas aeronáuticas.",
+                    "A Chave Reed Prince possui ponta em cruz aguda com ângulos internos retos, diferindo da chave Phillips."
+                ],
+                answer: 3,
+                explanation: "<strong>Resposta: D</strong><br>A chave Reed Prince possui rebaixo em cruz pontiagudo com ângulos de 90°, diferindo do perfil levemente arredondado da chave Phillips. Torquímetros jamais devem ser usados para desaperto e chaves manuais devem ser puxadas (não empurradas) para evitar lesões em escorregões."
+            },
+            {
+                module: "MÓDULO II — LOGÍSTICA, MANUTENÇÃO, FERRAMENTAS E ELETRICIDADE",
+                num: 11,
+                isCabo: false,
+                text: "No pátio de estacionamento de aeronaves, o Cabo de Apoio Técnico deve manusear os Equipamentos de Apoio de Solo (EAS). É uma regra fundamental de segurança e preservação no estacionamento dos EAS:",
+                options: [
+                    "Deixar os tratores engatados em marcha ré e sem calços para rápido acionamento.",
+                    "Manter os EAS nas áreas de segurança calçados (chocks), com freio de estacionamento acionado e extintores operacionais afixados.",
+                    "Desconectar o cabo da Unidade de Força Terrestre (GPU) e deixá-lo estendido diretamente sobre a pista de rolamento.",
+                    "Utilizar a Unidade Auxiliar de Partida (UAP) para carregar baterias descartáveis do hangar."
+                ],
+                answer: 1,
+                explanation: "<strong>Resposta: B</strong><br>Equipamentos de Apoio de Solo (EAS) parados na área de manobra/pátio devem obrigatoriamente ser mantidos com calços de segurança (chocks), freios travados e extintores de incêndio no prazo de validade."
+            },
+            {
+                module: "MÓDULO II — LOGÍSTICA, MANUTENÇÃO, FERRAMENTAS E ELETRICIDADE",
+                num: 12,
+                isCabo: false,
+                text: "Um circuito elétrico resistivo opera sob uma tensão de 24 Volts e possui uma resistência de 6 Ohms. Aplicando a Lei de Ohm (I = V / R) e a fórmula da potência elétrica (P = V x I), a corrente e a potência consumida no circuito são, respectivamente:",
+                options: ["4 Ampères e 96 Watts", "2 Ampères e 48 Watts", "4 Ampères e 24 Watts", "144 Ampères e 24 Watts"],
+                answer: 0,
+                explanation: "<strong>Resposta: A (4 A e 96 W)</strong><br>Corrente: $I = 24 / 6 = 4\text{ A}$.<br>Potência: $P = V \times I = 24 \times 4 = 96\text{ W}$."
+            },
+            {
+                module: "MÓDULO II — LOGÍSTICA, MANUTENÇÃO, FERRAMENTAS E ELETRICIDADE",
+                num: 13,
+                isCabo: false,
+                text: "Durante o funcionamento de sistemas elétricos, o aquecimento gerado pela passagem da corrente elétrica através de um condutor ou resistor denomina-se:",
+                options: ["Efeito Indutivo", "Efeito Joule", "Efeito Magnético", "Célula Galvanica"],
+                answer: 1,
+                explanation: "<strong>Resposta: B (Efeito Joule)</strong><br>O Efeito Joule consiste na conversão de energia elétrica em energia térmica devido à resistência oposta pelos átomos do condutor à passagem da corrente elétrica."
+            },
+
+            // MÓDULO III
+            {
+                module: "MÓDULO III — MECÂNICA AUTOMOTIVA, CORROSÃO E PUBLICAÇÕES TÉCNICAS",
+                num: 14,
+                isCabo: false,
+                text: "Antes de dar partida ao motor de uma viatura militar, o militar responsável deve realizar a inspeção pré-uso ('primeiro escalão'). Qual o procedimento correto referente à verificação de fluidos?",
+                options: [
+                    "O nível de óleo do motor deve ser medido com o veículo em plano inclinado e motor em funcionamento.",
+                    "A tampa de pressão do radiador deve ser aberta imediatamente após o desligamento do motor aquecido.",
+                    "O nível de óleo do motor deve ser verificado com a viatura nivelada e motor desligado, devendo a marca estar entre o 'Mínimo' e o 'Máximo'.",
+                    "A checagem do fluido de arrefecimento deve ser feita esvaziando totalmente o reservatório de expansão."
+                ],
+                answer: 2,
+                explanation: "<strong>Resposta: C</strong><br>A verificação correta do nível de óleo exige veículo em piso plano e motor frio/desligado para decantação total do fluido, devendo a vareta indicar nível entre as marcas MÍN e MÁX."
+            },
+            {
+                module: "MÓDULO III — MECÂNICA AUTOMOTIVA, CORROSÃO E PUBLICAÇÕES TÉCNICAS",
+                num: 15,
+                isCabo: false,
+                text: "Para realizar o procedimento de partida assistida com bateria auxiliar (jump-start) entre duas viaturas militares, o último cabo a ser conectado (negativo/preto) deve ser fixado em:",
+                options: [
+                    "Polo positivo da bateria doadora.",
+                    "Polo negativo da bateria descarregada.",
+                    "Ponto sólido de massa metálica não pintada do bloco do motor da viatura socorrida.",
+                    "Para-choque de plástico da viatura socorrida."
+                ],
+                answer: 2,
+                explanation: "<strong>Resposta: C</strong><br>O último cabo negativo deve ser acoplado à massa metálica não pintada do bloco para evitar que faíscas próximas aos bornes da bateria descarregada inflamem o gás hidrogênio acumulado."
+            },
+            {
+                module: "MÓDULO III — MECÂNICA AUTOMOTIVA, CORROSÃO E PUBLICAÇÕES TÉCNICAS",
+                num: 16,
+                isCabo: false,
+                text: "Para que se estabeleça uma célula galvânica elementar de corrosão eletroquímica nos materiais metálicos, é indispensável a presença simultânea de 4 elementos. Assinale a alternativa que apresenta esses 4 elementos:",
+                options: [
+                    "Anodo, Cátodo, Condutor Metálico e Eletrólito.",
+                    "Anodo, Cátodo, Isolante e Tinta Epóxi.",
+                    "Oxigênio, Nitrogênio, Água de Chuva e Friction.",
+                    "Metal de Base, Solda, Graxa e Cátodo."
+                ],
+                answer: 0,
+                explanation: "<strong>Resposta: A (Anodo, Cátodo, Condutor Metálico e Eletrólito)</strong><br>Estes são os 4 componentes indispensáveis que formam o circuito de corrosão eletroquímica/galvânica."
+            },
+            {
+                module: "MÓDULO III — MECÂNICA AUTOMOTIVA, CORROSÃO E PUBLICAÇÕES TÉCNICAS",
+                num: 17,
+                isCabo: false,
+                text: "Na FAB, a publicação técnica do SISMA de cumprimento compulsório e imediato, que tem por finalidade fixar procedimentos específicos sobre operação, manutenção e modificações de aeronaves e equipamentos, é denominada:",
+                options: ["Diretiva Técnica (DT)", "Publicação Administrativa (PA)", "Ordem Técnica (OT)", "Norma do Sistema (NSCA)"],
+                answer: 2,
+                explanation: "<strong>Resposta: C (Ordem Técnica - OT)</strong><br>A Ordem Técnica (OT) possui cumprimento compulsório, caráter mandatório e estabelece procedimentos de operação, inspeção e modificação do material aeronáutico."
+            },
+            {
+                module: "MÓDULO III — MECÂNICA AUTOMOTIVA, CORROSÃO E PUBLICAÇÕES TÉCNICAS",
+                num: 18,
+                isCabo: false,
+                text: "No Centro de Distribuição e Controle de Peças (CDCP), os materiais da classe SSS (Segurança, Salvamento e Sobrevivência) recebem etiquetas de conformidade do SISMA. O material que se encontra revisado e em perfeitas condições de uso operacional (pronto para instalação) é identificado pela etiqueta de cor:",
+                options: ["Amarela", "Vermelha", "Verde", "Azul"],
+                answer: 2,
+                explanation: "<strong>Resposta: C (Verde)</strong><br>Etiqueta VERDE indica material reparado/revisado disponível para uso imediato. Amarela = reparável/avariado; Vermelha = condenado/irrecuperável."
+            },
+
+            // MÓDULO IV
+            {
+                module: "MÓDULO IV — SAÚDE, BIOSSEGURANÇA, APH E ÉTICA PROFISSIONAL",
+                num: 19,
+                isCabo: false,
+                text: "Segundo a Classificação de Spaulding para artigos hospitalares, os materiais que entram em contato direto com tecidos estéreis ou com o sistema vascular do paciente (como bisturis e agulhas) são classificados como:",
+                options: ["Artigos Não Críticos", "Artigos Semicríticos", "Artigos Críticos", "Artigos Comuns"],
+                answer: 2,
+                explanation: "<strong>Resposta: C (Artigos Críticos)</strong><br>Artigos críticos são aqueles que penetram tecidos estéreis ou sistema vascular, exigindo obrigatoriamente o processo de esterilização."
+            },
+            {
+                module: "MÓDULO IV — SAÚDE, BIOSSEGURANÇA, APH E ÉTICA PROFISSIONAL",
+                num: 20,
+                isCabo: false,
+                text: "De acordo com a RDC ANVISA nº 222/2018, as lâminas de bisturi, agulhas e ampolas de vidro quebradas pertencem a qual grupo de resíduos de saúde e devem ser descartadas em quais recipientes?",
+                options: [
+                    "Grupo A — Sacos plásticos pretos.",
+                    "Grupo B — Frascos de vidro desprotegidos.",
+                    "Grupo D — Sacos brancos leitosos.",
+                    "Grupo E — Recipientes rígidos, resistentes a punctura (caixas tipo Descarpack), até 3/4 da capacidade."
+                ],
+                answer: 3,
+                explanation: "<strong>Resposta: D (Grupo E)</strong><br>Resíduos perfurocortantes integram o Grupo E e devem ser descartados exclusivamente em recipientes rígidos de papelão/plástico com fecho de segurança até o limite de 3/4 do volume."
+            },
+            {
+                module: "MÓDULO IV — SAÚDE, BIOSSEGURANÇA, APH E ÉTICA PROFISSIONAL",
+                num: 21,
+                isCabo: false,
+                text: "Ao aferir os Sinais Vitais (SV) de um militar adulto em repouso, o profissional de saúde encontrou os seguintes valores: Frequência Cardíaca de 115 bpm e Frequência Respiratória de 24 irpm. O quadro clínico do paciente apresenta:",
+                options: ["Bradicardia e Bradipneia", "Taquicardia e Taquipneia", "Normocardia e Eupneia", "Hipotensão e Hiperpirexia"],
+                answer: 1,
+                explanation: "<strong>Resposta: B (Taquicardia e Taquipneia)</strong><br>Frequência Cardíaca acima de 100 bpm indica Taquicardia (normal: 60-100 bpm). Frequência Respiratória acima de 20 irpm indica Taquipneia (normal: 12-20 irpm)."
+            },
+            {
+                module: "MÓDULO IV — SAÚDE, BIOSSEGURANÇA, APH E ÉTICA PROFISSIONAL",
+                num: 22,
+                isCabo: false,
+                text: "De acordo com as diretrizes atualizadas da American Heart Association (AHA) para Reanimação Cardiopulmonar (RCP) em adultos, a frequência correta de compressões torácicas e a profundidade adequada são:",
+                options: [
+                    "Exatamente 100 compressões por minuto, deprimindo o tórax em 3 a 4 cm.",
+                    "100 a 120 compressões por minuto, deprimindo o tórax a uma profundidade de 5 a 6 cm.",
+                    "80 a 100 compressões por minuto, deprimindo o tórax a uma profundidade de 7 cm.",
+                    "120 a 140 compressões por minuto, sem permitir o retorno do tórax."
+                ],
+                answer: 1,
+                explanation: "<strong>Resposta: B (100-120/min e 5-6 cm)</strong><br>As diretrizes estipulam frequência de 100 a 120 compressões/minuto e profundidade de compressão do esterno adulto entre 5 cm e 6 cm, permitindo retorno total do tórax."
+            },
+            {
+                module: "MÓDULO IV — SAÚDE, BIOSSEGURANÇA, APH E ÉTICA PROFISSIONAL",
+                num: 23,
+                isCabo: false,
+                text: "Durante o atendimento pré-hospitalar em um acidente com vítima apresentando evisceração abdominal, a conduta correta do socorrista é:",
+                options: [
+                    "Reintroduzir imediatamente as alças intestinais para dentro da cavidade abdominal.",
+                    "Lavar a ferida com álcool 70% e deixar as vísceras expostas ao ar seco.",
+                    "Não tentar recolocar os órgãos para dentro; cobrir com compressas limpas e umedecidas em soro fisiológico e proteger com filme plástico.",
+                    "Aplicar um torniquete tático acima da região umbilicial."
+                ],
+                answer: 2,
+                explanation: "<strong>Resposta: C</strong><br>Em eviscerações abdominais jamais se deve empurrar as alças expostas para o interior da cavidade. A conduta é cobrir os órgãos com gaze/compressa umedecida e envolver com cobertura estéril impermeável."
+            },
+            {
+                module: "MÓDULO IV — SAÚDE, BIOSSEGURANÇA, APH E ÉTICA PROFISSIONAL",
+                num: 24,
+                isCabo: false,
+                text: "O consultor Clauss Möller systematizou três virtudes fundamentais para a ética e excelência no trabalho. Assinale a alternativa que apresenta corretamente essas três virtudes:",
+                options: [
+                    "Disciplina, Hierarquia e Camaradagem.",
+                    "Responsabilidade, Lealdade e Iniciativa.",
+                    "Assiduidade, Imparcialidade e Obediência.",
+                    "Coragem, Patriotismo e Prontidão."
+                ],
+                answer: 1,
+                explanation: "<strong>Resposta: B (Responsabilidade, Lealdade e Iniciativa)</strong><br>Segundo a doutrina de qualidade de Clauss Möller, as três virtudes indispensáveis no trabalho são Responsabilidade, Lealdade e Iniciativa."
+            },
+
+            // MÓDULO V
+            {
+                module: "MÓDULO V — ESTATUTO DOS MILITARES (LEI Nº 6.880/1980)",
+                num: 25,
+                isCabo: true,
+                text: "Conforme estabelece o artigo 38 do Estatuto dos Militares, os Cabos, Taifeiros-Mores, Soldados e demais praças de mesma hierarquia são classificados, dentro da estrutura das Forças Armadas, como elementos de:",
+                options: ["Comando e Direção.", "Auxílio e Complementação das atividades dos oficiais.", "Execução.", "Orientação e Fiscalização Superior."],
+                answer: 2,
+                explanation: "<strong>Resposta: C (Execução)</strong><br>Art. 38 da Lei nº 6.880/1980: Os Cabos e Soldados são essencialmente elementos de execução das atividades militares."
+            },
+            {
+                module: "MÓDULO V — ESTATUTO DOS MILITARES (LEI Nº 6.880/1980)",
+                num: 26,
+                isCabo: true,
+                text: "Em conformidade com o Quadro de Círculos e Escala Hierárquica constante do Anexo I da Lei nº 6.880/1980, os Cabos pertencem ao:",
+                options: ["Círculo de Suboficiais e Sargentos.", "Círculo de Cabos e Soldados.", "Círculo de Praças Especiais.", "Círculo de Oficiais Subalternos."],
+                answer: 1,
+                explanation: "<strong>Resposta: B (Círculo de Cabos e Soldados)</strong><br>No Anexo I do Estatuto dos Militares, a escala das praças divide-se no Círculo de Suboficiais e Sargentos e no Círculo de Cabos e Soldados."
+            },
+            {
+                module: "MÓDULO V — ESTATUTO DOS MILITARES (LEI Nº 6.880/1980)",
+                num: 27,
+                isCabo: true,
+                text: "De acordo com o art. 19 do Estatuto dos Militares, a precedência hierárquica entre as Praças Especiais e os Cabos é assim regulada: os alunos dos órgãos de formação de oficiais da reserva, quando fardados, têm precedência sobre os Cabos, aos quais são equiparados. Por sua vez, os Cabos têm precedência sobre:",
+                options: [
+                    "Os Terceiros-Sargentos.",
+                    "Os alunos das escolas ou dos centros de formação de sargentos (aos quais são equiparados).",
+                    "Os Aspirantes-a-Oficial.",
+                    "Os Suboficiais e Subtenentes."
+                ],
+                answer: 1,
+                explanation: "<strong>Resposta: B</strong><br>Art. 19, V do Estatuto: Os Cabos têm precedência sobre os alunos das escolas/centros de formação de sargentos, aos quais são equiparados, respeitadas as demais antiguidades."
+            },
+            {
+                module: "MÓDULO V — ESTATUTO DOS MILITARES (LEI Nº 6.880/1980)",
+                num: 28,
+                isCabo: true,
+                text: "Conforme disposto no art. 50 da Lei nº 6.880/1980, a estabilidade do militar é um direito que se adquire, no caso das praças de carreira, quando contam com o seguinte tempo de efetivo serviço:",
+                options: ["3 (três) anos ou mais.", "5 (cinco) anos ou mais.", "10 (dez) anos ou mais.", "35 (trinta e cinco) anos."],
+                answer: 2,
+                explanation: "<strong>Resposta: C (10 anos ou mais)</strong><br>Art. 50, IV, 'a' da Lei 6.880/80: A estabilidade da praça é adquirida com 10 (dez) ou mais anos de tempo de efetivo serviço."
+            },
+            {
+                module: "MÓDULO V — ESTATUTO DOS MILITARES (LEI Nº 6.880/1980)",
+                num: 29,
+                isCabo: true,
+                text: "Segundo o art. 98, inciso I, da Lei nº 6.880/1980, a transferência ex officio para a reserva remunerada ocorrerá quando o militar atingir a idade-limite de permanência na ativa. Para a graduação de Cabo, essa idade-limite é de:",
+                options: ["50 anos.", "54 anos.", "55 anos.", "63 anos."],
+                answer: 1,
+                explanation: "<strong>Resposta: B (54 anos)</strong><br>Art. 98, I, 'c', item 5 do Estatuto dos Militares: A idade-limite para permanência na ativa das Praças (Cabos) é de 54 anos."
+            },
+            {
+                module: "MÓDULO V — ESTATUTO DOS MILITARES (LEI Nº 6.880/1980)",
+                num: 30,
+                isCabo: true,
+                text: "A violação dos deveres e obrigações militares acarretará responsabilidade funcional, pecuniária, disciplinar ou penal. O Guarda-Marinha, o Aspirante-a-Oficial e as praças com estabilidade assegurada (incluindo os Cabos estáveis), presumivelmente incapazes de permanecerem na ativa, serão submetidos a:",
+                options: ["Conselho de Justificação.", "Conselho de Disciplina.", "Inquérito Policial Militar simplificado.", "Tribunal Marítimo."],
+                answer: 1,
+                explanation: "<strong>Resposta: B (Conselho de Disciplina)</strong><br>Art. 49 do Estatuto: As praças com estabilidade assegurada são julgadas por Conselho de Disciplina. (Oficiais são submetidos a Conselho de Justificação)."
+            },
+            {
+                module: "MÓDULO V — ESTATUTO DOS MILITARES (LEI Nº 6.880/1980)",
+                num: 31,
+                isCabo: false,
+                text: "De acordo com o art. 14 do Estatuto dos Militares, os dois pilares que constituem a base institucional das Forças Armadas são:",
+                options: ["A ética e o patriotismo.", "A hierarquia e a disciplina.", "O soldo e a promoção.", "O comando e a subordinação."],
+                answer: 1,
+                explanation: "<strong>Resposta: B (A hierarquia e a disciplina)</strong><br>Art. 14 do Estatuto: A hierarquia e a disciplina são a base institucional das Forças Armadas."
+            },
+            {
+                module: "MÓDULO V — ESTATUTO DOS MILITARES (LEI Nº 6.880/1980)",
+                num: 32,
+                isCabo: false,
+                text: "É considerado ausente o militar que, por mais de ________ horas consecutivas, deixar de comparecer à sua OM sem comunicar impedimento ou ausentar-se sem licença. Por sua vez, é considerado desaparecido o militar em serviço/campanha cujo paradeiro for ignorado por mais de ________ dias.",
+                options: ["12 horas; 5 dias.", "24 horas; 8 dias.", "48 horas; 10 dias.", "24 horas; 30 dias."],
+                answer: 1,
+                explanation: "<strong>Resposta: B (24 horas; 8 dias)</strong><br>Conforme os artigos 81 e 88 do Estatuto: Ausente = mais de 24 horas de falta não autorizada; Desaparecido = paradeiro ignorado por mais de 8 dias."
+            },
+
+            // MÓDULO VI
+            {
+                module: "MÓDULO VI — REGULAMENTO INTERNO DOS SERVIÇOS DA AERONÁUTICA (RISAER)",
+                num: 33,
+                isCabo: true,
+                text: "No RISAER (Capítulo II e VII), estão discriminados os serviços de escala atribuídos aos Cabos, Soldados e Taifeiros. Assinale a opção que apresenta um serviço atribuído exclusivamente a Cabos, Soldados ou Taifeiros:",
+                options: ["Adjunto ao Oficial de Dia", "Cabo de Dia e Cabo da Guarda", "Comandante da Guarda", "Fiscal de Dia ao Rancho"],
+                answer: 1,
+                explanation: "<strong>Resposta: B (Cabo de Dia e Cabo da Guarda)</strong><br>No RISAER (Art. 5º, III), as funções de Cabo de Dia e Cabo da Guarda são escalas exclusivas do Círculo de Cabos e Soldados."
+            },
+            {
+                module: "MÓDULO VI — REGULAMENTO INTERNO DOS SERVIÇOS DA AERONÁUTICA (RISAER)",
+                num: 34,
+                isCabo: true,
+                text: "De acordo com o art. 120 e 122 do RISAER, o Cabo da Guarda e o Cabo de Dia atuam, em suas respectivas esferas de atribuição, como auxiliares imediatos e substitutos eventuais, respectivamente, do:",
+                options: [
+                    "Oficial de Dia e do Auxiliar do Oficial de Dia.",
+                    "Comandante da Guarda e do Sargento de Dia.",
+                    "Sentinela das Armas e do Soldado de Plantão.",
+                    "Superior de Dia e do Fiscal de Dia."
+                ],
+                answer: 1,
+                explanation: "<strong>Resposta: B (Comandante da Guarda e do Sargento de Dia)</strong><br>O Cabo da Guarda auxilia/substitui o Comandante da Guarda; o Cabo de Dia auxilia/substitui o Sargento de Dia no âmbito das subunidades/alojamentos."
+            },
+            {
+                module: "MÓDULO VI — REGULAMENTO INTERNO DOS SERVIÇOS DA AERONÁUTICA (RISAER)",
+                num: 35,
+                isCabo: true,
+                text: "A Sentinela é a praça armada incumbida da vigilância de uma área, sendo inviolável e possuindo prerrogativas regulamentares. Em relação às escalas de serviço do posto de sentinela, o RISAER estabelece que cada sentinela, preferencialmente, não deve permanecer no seu posto por mais de:",
+                options: ["1 hora consecutiva.", "2 horas consecutivas.", "4 horas consecutivas.", "6 horas consecutivas."],
+                answer: 1,
+                explanation: "<strong>Resposta: B (2 horas consecutivas)</strong><br>RISAER (Art. 140): A permanência contínua da praça no posto de sentinela armada não deve exceder 2 horas consecutivas."
+            },
+            {
+                module: "MÓDULO VI — REGULAMENTO INTERNO DOS SERVIÇOS DA AERONÁUTICA (RISAER)",
+                num: 36,
+                isCabo: true,
+                text: "Ao assumir o serviço, o Cabo da Guarda deve conduzir as praças para a rendição das sentinelas. Ao proceder à substituição no Portão Principal da OM, qual deve ser a última sentinela a ser substituída?",
+                options: [
+                    "Sentinela do Paiol de Munição",
+                    "Sentinela do Alojamento de Praças",
+                    "Sentinela das Armas",
+                    "Sentinela da garagem de viaturas"
+                ],
+                answer: 2,
+                explanation: "<strong>Resposta: C (Sentinela das Armas)</strong><br>Conforme prescreve o RISAER (Art. 30, II), no desfile ou ronda de rendição do serviço de guarda, a Sentinela das Armas é obrigatoriamente a última a ser substituída."
+            },
+            {
+                module: "MÓDULO VI — REGULAMENTO INTERNO DOS SERVIÇOS DA AERONÁUTICA (RISAER)",
+                num: 37,
+                isCabo: false,
+                text: "Ao confeccionar a Escala de Serviço, deve ser observada entre dois serviços de igual natureza ou não, para o mesmo militar, uma folga mínima de:",
+                options: ["12 horas.", "24 horas.", "48 horas.", "72 horas."],
+                answer: 2,
+                explanation: "<strong>Resposta: C (48 horas)</strong><br>RISAER (Art. 16): Entre dois serviços de escala consecutivos deve ser garantido o descanso mínimo regulamentar de 48 horas de descanso/folga."
+            },
+            {
+                module: "MÓDULO VI — REGULAMENTO INTERNO DOS SERVIÇOS DA AERONÁUTICA (RISAER)",
+                num: 38,
+                isCabo: false,
+                text: "As Situações Especiais nas Organizações Militares são decorrentes da decretação de Estado de Defesa, Estado de Sítio, Intervenção Federal ou GLO. Quando a OM mantém pernoitando em suas instalações 1/3 (um terço) do seu efetivo pronto para ações, a situação é classificada como:",
+                options: ["Sobreaviso", "Prontidão Parcial", "Prontidão Total", "Prontidão Extraordinária"],
+                answer: 1,
+                explanation: "<strong>Resposta: B (Prontidão Parcial)</strong><br>RISAER (Art. 215, III): Prontidão Parcial exige a retenção e pernoite de 1/3 do efetivo da OM pronto para pronto emprego."
+            },
+            {
+                module: "MÓDULO VI — REGULAMENTO INTERNO DOS SERVIÇOS DA AERONÁUTICA (RISAER)",
+                num: 39,
+                isCabo: false,
+                text: "O afastamento total do serviço concedido ao militar em virtude de ter contraído matrimônio denominado Núpcias e o afastamento concedido em virtude do falecimento de parentes diretos denominado Luto têm a duração legal de:",
+                options: ["5 dias e 5 dias.", "8 dias e 8 dias.", "10 dias e 8 dias.", "15 dias e 30 dias."],
+                answer: 1,
+                explanation: "<strong>Resposta: B (8 dias e 8 dias)</strong><br>Tanto a licença por Núpcias quanto por Luto concedem 8 dias consecutivos de afastamento das atividades de serviço."
+            },
+            {
+                module: "MÓDULO VI — REGULAMENTO INTERNO DOS SERVIÇOS DA AERONÁUTICA (RISAER)",
+                num: 40,
+                isCabo: false,
+                text: "Quando ocorre o falecimento de um militar na ativa, a comissão designada na OM para realizar o inventário analítico de todos os objetos particulares e pertencentes à União deixados pelo militar elabora o documento denominado:",
+                options: [
+                    "Inquérito Sanitário de Origem",
+                    "Termo de Arrolamento de Bens",
+                    "Guia de Trânsito de Material",
+                    "Partes de Ocorrência do Oficial de Dia"
+                ],
+                answer: 1,
+                explanation: "<strong>Resposta: B (Termo de Arrolamento de Bens)</strong><br>RISAER (Art. 289): O inventário oficial dos pertences deixados por militar falecido para salvaguarda de patrimônio é formalizado no Termo de Arrolamento de Bens."
+            }
+        ];
+
+        let userAnswers = {};
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            let currentModule = "";
+
+            questionsData.forEach((q, idx) => {
+                if (q.module !== currentModule) {
+                    currentModule = q.module;
+                    const modHeader = document.createElement('div');
+                    modHeader.className = 'module-title';
+                    modHeader.innerHTML = `<span>📋</span> ${currentModule}`;
+                    container.appendChild(modHeader);
+                }
+
+                const qCard = document.createElement('div');
+                qCard.className = 'question-card';
+                qCard.id = `q-card-${idx}`;
+
+                let caboBadge = q.isCabo ? '<span class="badge-cabo">FOCO: CABO FAB</span>' : '';
+
+                let optionsHTML = q.options.map((opt, optIdx) => `
+                    <label class="option-label" id="label-${idx}-${optIdx}">
+                        <input type="radio" name="q-${idx}" value="${optIdx}" onchange="selectOption(${idx}, ${optIdx})">
+                        ${String.fromCharCode(65 + optIdx)}) ${opt}
+                    </label>
+                `).join('');
+
+                qCard.innerHTML = `
+                    <div class="question-header">
+                        <span class="question-number">QUESTÃO ${String(q.num).padStart(2, '0')}</span>
+                        ${caboBadge}
+                    </div>
+                    <div class="question-text">${q.text}</div>
+                    <div class="options">
+                        ${optionsHTML}
+                    </div>
+                    <button class="btn-check" onclick="checkAnswer(${idx})">Responder / Ver Gabarito</button>
+                    <div class="explanation" id="exp-${idx}">
+                        ${q.explanation}
+                    </div>
+                `;
+
+                container.appendChild(qCard);
+            });
+        }
+
+        function selectOption(qIdx, optIdx) {
+            userAnswers[qIdx] = optIdx;
+        }
+
+        function checkAnswer(qIdx) {
+            const selectedOpt = userAnswers[qIdx];
+            const qData = questionsData[qIdx];
+            const expDiv = document.getElementById(`exp-${qIdx}`);
+
+            if (selectedOpt === undefined) {
+                alert("Por favor, selecione uma alternativa antes de verificar a resposta!");
+                return;
+            }
+
+            // Lock inputs for this question
+            const inputs = document.getElementsByName(`q-${qIdx}`);
+            inputs.forEach(input => input.disabled = true);
+
+            // Highlight correct/incorrect options
+            qData.options.forEach((_, optIdx) => {
+                const label = document.getElementById(`label-${qIdx}-${optIdx}`);
+                if (optIdx === qData.answer) {
+                    label.classList.add('correct-opt');
+                } else if (optIdx === selectedOpt) {
+                    label.classList.add('incorrect-opt');
+                }
+            });
+
+            // Show explanation
+            expDiv.style.display = 'block';
+            if (selectedOpt === qData.answer) {
+                expDiv.style.backgroundColor = '#f0fdf4';
+                expDiv.style.color = '#15803d';
+                expDiv.style.border = '1px solid #bbf7d0';
+            } else {
+                expDiv.style.backgroundColor = '#fef2f2';
+                expDiv.style.color = '#b91c1c';
+                expDiv.style.border = '1px solid #fecaca';
+            }
+
+            updateScore();
+        }
+
+        function updateScore() {
+            let answered = 0;
+            let correct = 0;
+            let incorrect = 0;
+
+            questionsData.forEach((q, idx) => {
+                const selected = userAnswers[idx];
+                if (selected !== undefined) {
+                    const inputs = document.getElementsByName(`q-${idx}`);
+                    if (inputs[0].disabled) {
+                        answered++;
+                        if (selected === q.answer) {
+                            correct++;
+                        } else {
+                            incorrect++;
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('answered-count').innerText = answered;
+            document.getElementById('correct-count').innerText = correct;
+            document.getElementById('incorrect-count').innerText = incorrect;
+        }
+
+        window.onload = renderQuiz;
+    </script>
+</body>
+</html>
